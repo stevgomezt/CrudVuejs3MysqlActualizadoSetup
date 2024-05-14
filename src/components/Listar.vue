@@ -1,3 +1,43 @@
+<script setup>
+import { ref, onMounted } from "vue";
+
+// Declaración de la variable reactiva 'empleados' utilizando 'ref()'
+const empleados = ref([]);
+
+// Método para consultar los empleados al montar el componente
+onMounted(() => {
+    // Realizar una solicitud GET al servidor para obtener la lista de empleados
+    fetch("http://localhost/empleados/")
+        .then((respuesta) => respuesta.json())
+        .then((datosRespuesta) => {
+            console.log(datosRespuesta); // Imprimir los datos de la respuesta en la consola
+            empleados.value = []; // Reiniciar la lista de empleados
+            // Comprobar si la respuesta no contiene un campo 'success'
+            if (typeof datosRespuesta[0].success === "undefined") {
+                empleados.value = datosRespuesta; // Asignar los datos de la respuesta a la variable 'empleados'
+            } else {
+                // Manejar el caso de respuesta de error
+                console.error("Error en la respuesta del servidor");
+            }
+        })
+        .catch(console.error); // Manejo de errores
+});
+
+// Método para borrar un empleado
+const borrarEmpleado = (id) => {
+    console.log(id); // Imprimir el ID del empleado en la consola
+    // Realizar una solicitud GET al servidor para borrar el empleado con el ID proporcionado
+    fetch(`http://localhost/empleados/?borrar=${id}`)
+        .then((respuesta) => respuesta.json())
+        .then((datosRespuesta) => {
+            console.log(datosRespuesta); // Imprimir los datos de la respuesta en la consola
+            // Redireccionar a la página de listar después de borrar el empleado
+            window.location.href = "listar";
+        })
+        .catch(console.error); // Manejo de errores
+};
+</script>
+
 <template>
     <div class="container">
         <router-link class="btn btn-success my-1" to="/crear"
@@ -32,11 +72,10 @@
                                             params: { id: empleado.id },
                                         }"
                                         class="btn btn-success mr-1"
+                                        >Editar</router-link
                                     >
-                                        Editar
-                                    </router-link>
                                     <button
-                                        v-on:click="borrarEmpleado(empleado.id)"
+                                        @click="borrarEmpleado(empleado.id)"
                                         type="button"
                                         class="btn btn-success mr-1"
                                     >
@@ -51,48 +90,5 @@
         </div>
     </div>
 </template>
-
-<script>
-export default {
-    data() {
-        return {
-            empleados: [],
-        };
-    },
-
-    created: function () {
-        this.consultarEmpleados();
-    },
-
-    methods: {
-        consultarEmpleados() {
-            fetch("http://localhost/empleados/")
-                .then((respuesta) => respuesta.json())
-                .then((datosRespuesta) => {
-                    console.log(datosRespuesta);
-                    this.empleados = [];
-                    if (typeof datosRespuesta[0].success === "undefined") {
-                        this.empleados = datosRespuesta;
-                    } else {
-                        // Manejar el caso de respuesta de error
-                        console.error("Error en la respuesta del servidor");
-                    }
-                })
-                .catch(console.error);
-        },
-
-        borrarEmpleado(id) {
-            console.log(id);
-            fetch("http://localhost/empleados/?borrar=" + id)
-                .then((respuesta) => respuesta.json())
-                .then((datosRespuesta) => {
-                    console.log(datosRespuesta);
-                    window.location.href = "listar";
-                })
-                .catch(console.error);
-        },
-    },
-};
-</script>
 
 <style scoped></style>

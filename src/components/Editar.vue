@@ -1,51 +1,49 @@
-<script>
-export default {
-    data() {
-        return {
-            empleado: {},
-        };
-    },
+<script setup>
+import { ref, onMounted } from "vue"; // Importación de la función 'ref' y el hook 'onMounted' de Vue
+import { useRoute } from "vue-router"; // Importación de 'useRoute' de Vue Router
 
-    created: function () {
-        this.obtenerInformacionId();
-    },
+// Declaración de la variable reactiva 'empleado' utilizando 'ref()'
+const empleado = ref({});
+// Obtención de la ruta actual utilizando el hook 'useRoute'
+const route = useRoute();
 
-    methods: {
-        obtenerInformacionId() {
-            fetch(
-                "http://localhost/empleados/?consultar=" + this.$route.params.id
-            )
-                .then((respuesta) => respuesta.json())
-                .then((datosRespuesta) => {
-                    console.log(datosRespuesta);
-                    this.empleado = datosRespuesta[0];
-                })
-                .catch(console.log);
-        },
-
-        actualizarRegistro() {
-            var datosEnviar = {
-                id: this.$route.params.id,
-                nombre: this.empleado.nombre,
-                email: this.empleado.email,
-            };
-
-            fetch(
-                "http://localhost/empleados/?actualizar=" +
-                    this.$route.params.id,
-                {
-                    method: "POST",
-                    body: JSON.stringify(datosEnviar),
-                }
-            )
-                .then((respuesta) => respuesta.json())
-                .then((datosRespuesta) => {
-                    console.log(datosRespuesta);
-                    window.location.href = "../listar";
-                });
-        },
-    },
+// Función para obtener la información del empleado con el ID proporcionado en la ruta
+const obtenerInformacionId = () => {
+    // Realizar una solicitud GET al servidor para obtener los datos del empleado
+    fetch(`http://localhost/empleados/?consultar=${route.params.id}`)
+        .then((respuesta) => respuesta.json())
+        .then((datosRespuesta) => {
+            console.log(datosRespuesta); // Imprimir los datos del empleado en la consola
+            empleado.value = datosRespuesta[0]; // Asignar los datos del empleado a la variable reactiva 'empleado'
+        })
+        .catch(console.log); // Manejo de errores
 };
+
+// Función para actualizar el registro del empleado
+const actualizarRegistro = () => {
+    // Crear un objeto con los datos del empleado para enviar al servidor
+    const datosEnviar = {
+        id: route.params.id,
+        nombre: empleado.value.nombre,
+        email: empleado.value.email,
+    };
+
+    // Realizar una solicitud POST al servidor para actualizar el registro del empleado
+    fetch(`http://localhost/empleados/?actualizar=${route.params.id}`, {
+        method: "POST",
+        body: JSON.stringify(datosEnviar), // Convertir los datos a formato JSON
+    })
+        .then((respuesta) => respuesta.json())
+        .then((datosRespuesta) => {
+            console.log(datosRespuesta); // Imprimir la respuesta del servidor en la consola
+            window.location.href = "../listar"; // Redireccionar a la página de listar después de actualizar el registro
+        });
+};
+
+// Hook 'onMounted' para ejecutar la función 'obtenerInformacionId()' cuando el componente se monta
+onMounted(() => {
+    obtenerInformacionId();
+});
 </script>
 
 <template>
@@ -53,7 +51,7 @@ export default {
         <div class="card">
             <div class="card-header">Editar Empleados</div>
             <div class="card-body">
-                <form v-on:submit.prevent="actualizarRegistro">
+                <form @submit.prevent="actualizarRegistro">
                     <div class="form-group">
                         <label for="nombre">Nombre:</label>
                         <input

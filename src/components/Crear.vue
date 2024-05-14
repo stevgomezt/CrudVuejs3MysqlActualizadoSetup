@@ -1,32 +1,35 @@
-<script>
+<script setup>
+import { ref } from "vue";
 
-export default {
-    data() {
-        return {
-            empleado: {},
-        };
-    },
+// Declaración de la variable reactiva 'empleado'
+const empleado = ref({
+    nombre: "",
+    email: "",
+});
 
-    methods: {
-        agregarRegistro() {
-            console.log(this.empleado);
+// Función para agregar un nuevo registro de empleado
+const agregarRegistro = () => {
+    // Imprimir los datos del empleado en la consola
+    console.log(empleado.value);
 
-            var datosEnviar = {
-                nombre: this.empleado.nombre,
-                email: this.empleado.email,
-            };
+    // Crear un objeto con los datos del empleado para enviar al servidor
+    const datosEnviar = {
+        nombre: empleado.value.nombre,
+        email: empleado.value.email,
+    };
 
-            fetch("http://localhost/empleados/?insertar=1", {
-                method: "POST",
-                body: JSON.stringify(datosEnviar),
-            })
-                .then((respuesta) => respuesta.json())
-                .then((datosRespuesta) => {
-                    console.log(datosRespuesta);
-                    window.location.href = "listar";
-                });
-        },
-    },
+    // Realizar una solicitud POST al servidor para insertar un nuevo registro de empleado
+    fetch("http://localhost/empleados/?insertar=1", {
+        method: "POST",
+        body: JSON.stringify(datosEnviar),
+    })
+        .then((respuesta) => respuesta.json())
+        .then((datosRespuesta) => {
+            // Imprimir la respuesta del servidor en la consola
+            console.log(datosRespuesta);
+            // Redireccionar a la página de listar después de agregar el registro
+            window.location.href = "listar";
+        });
 };
 </script>
 
@@ -35,7 +38,7 @@ export default {
         <div class="card">
             <div class="card-header">Crear Empleados</div>
             <div class="card-body">
-                <form v-on:submit.prevent="agregarRegistro">
+                <form @submit.prevent="agregarRegistro">
                     <div class="form-group">
                         <label for="nombre">Nombre:</label>
                         <input
@@ -44,13 +47,10 @@ export default {
                             class="form-control"
                             name="nombre"
                             id="nombre"
-                            aria-describedby="helpId"
                             placeholder="Escriba su Nombre"
                             required
                         />
-                        <small id="helpId" class="form-text text-muted"
-                            >Nombre</small
-                        >
+                        <small class="form-text text-muted">Nombre</small>
                     </div>
                     <div class="form-group">
                         <label for="email">Email:</label>
@@ -60,13 +60,10 @@ export default {
                             class="form-control"
                             name="email"
                             id="email"
-                            aria-describedby="helpId"
                             placeholder="Escriba su email"
                             required
                         />
-                        <small id="helpId" class="form-text text-muted"
-                            >email</small
-                        >
+                        <small class="form-text text-muted">email</small>
                     </div>
                     <div class="btn-group" role="group" aria-label="">
                         <button type="submit" class="btn btn-primary mr-1">
